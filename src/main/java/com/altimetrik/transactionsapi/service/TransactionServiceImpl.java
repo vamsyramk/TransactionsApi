@@ -4,6 +4,8 @@ import com.altimetrik.transactionsapi.dto.ApiResponse;
 import com.altimetrik.transactionsapi.exception.TransactionApiException;
 import com.altimetrik.transactionsapi.modal.Statistics;
 import com.altimetrik.transactionsapi.modal.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+
+    private static final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
     private List<Transaction> transactions = new ArrayList<>();
 
@@ -37,11 +41,13 @@ public class TransactionServiceImpl implements TransactionService {
         ApiResponse apiResponse = new ApiResponse();
         Duration duration = Duration.between(transaction.getTime(), LocalDateTime.now());
         if (duration.getSeconds() > 60) {
+            log.error("The transaction time is out of one minute for: {}", transaction);
             throw new TransactionApiException(204, "The transaction has not been updated successfully", HttpStatus.NO_CONTENT);
         }
         addTransaction(transaction);
         apiResponse.setStatus("Success");
         apiResponse.setMessage("The transaction has been updated successfully");
+        log.info("The transaction is inserted successfully, current no of transactions: {}", getTransactions().size());
         return apiResponse;
     }
 
@@ -66,6 +72,7 @@ public class TransactionServiceImpl implements TransactionService {
                 avg = sum / count;
             }
         }
+        log.info("Fetching the transactions information, current no of transactions: {}", getTransactions().size());
         return new Statistics(min, max, avg, sum, count);
     }
 
@@ -74,11 +81,8 @@ public class TransactionServiceImpl implements TransactionService {
         setTransactions(new ArrayList<>());
         ApiResponse apiResponse = new ApiResponse();
         if (CollectionUtils.isEmpty(getTransactions())) {
-            apiResponse.setStatus("Success");
-            apiResponse.setMessage("The transactions have been deleted successfully");
-            return apiResponse;
-        } else {
-            throw new TransactionApiException(204, "No transactions to delete", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.info("The transactions were deleted successfully,current transactions: {}", getTransactions().size());
         }
+        return apiResponse;
     }
 }

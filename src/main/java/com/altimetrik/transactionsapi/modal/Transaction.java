@@ -26,4 +26,12 @@ public class Transaction {
     public void setTime(LocalDateTime time) {
         this.time = time;
     }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "amount=" + amount +
+                ", time=" + time +
+                '}';
+    }
 }

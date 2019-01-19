@@ -34,29 +34,36 @@ public class TransactionServiceImplTest {
 
     @Before
     public void setUp() {
-
-    }
-
-    @Test
-    public void whenValidTransaction_thenTransactionSouldBeInserted() {
-        Transaction transaction = new Transaction();
-        transaction.setAmount(3000);
-        transaction.setTime(LocalDateTime.now());
-        ApiResponse apiResponse = transactionService.saveTransaction(transaction);
-        assertEquals(apiResponse.getStatus(), "Success");
-    }
-
-    @Test
-    public void whenValidTransaction_thenTransactionSouldBeReturned() {
+        transactionService.deleteTransactions();
         Transaction transaction = new Transaction();
         transaction.setAmount(3000);
         transaction.setTime(LocalDateTime.now());
         for(int i = 0; i < 4; i++) {
             transactionService.saveTransaction(transaction);
         }
+    }
+
+    @Test
+    public void whenValidTransaction_thenTransactionShouldBeInserted() {
+        Transaction transaction = new Transaction();
+        transaction.setAmount(3000);
+        transaction.setTime(LocalDateTime.now());
+        ApiResponse apiResponse = transactionService.saveTransaction(transaction);
+        assertEquals("Success", apiResponse.getStatus());
+    }
+
+    @Test
+    public void whenValidTransaction_thenTransactionShouldBeReturned() {
         Statistics statistics = transactionService.getTransactionsInformation();
         System.out.println(statistics);
-        assertEquals(statistics.getSum(), 12000, 0.0);
+        assertEquals( 12000, statistics.getSum(),0.0);
+    }
+
+    @Test
+    public void whenDeleteTransaction_thenTransactionShouldBeDeleted() {
+        assertEquals(12000, transactionService.getTransactionsInformation().getSum(),0.0);
+        transactionService.deleteTransactions();
+        assertEquals(0.0, transactionService.getTransactionsInformation().getSum(), 0.0);
     }
 
 }
