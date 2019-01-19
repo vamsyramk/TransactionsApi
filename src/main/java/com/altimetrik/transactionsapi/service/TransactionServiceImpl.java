@@ -12,7 +12,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -28,7 +27,7 @@ public class TransactionServiceImpl implements TransactionService {
     public ApiResponse saveTransaction(Transaction transaction) {
         ApiResponse apiResponse = new ApiResponse();
         Duration duration = Duration.between(transaction.getTime(), LocalDateTime.now());
-        if (duration.getSeconds() > 60 || transaction.getTime().isAfter(LocalDateTime.now())) {
+        if (duration.getSeconds() >= 60 || transaction.getTime().isAfter(LocalDateTime.now())) {
             log.error("The transaction time is out of one minute for: {}", transaction);
             throw new TransactionApiException(204, "The transaction has not been updated successfully", HttpStatus.NO_CONTENT);
         }

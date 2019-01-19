@@ -1,6 +1,7 @@
 package com.altimetrik.transactionsapi.service;
 
 import com.altimetrik.transactionsapi.dto.ApiResponse;
+import com.altimetrik.transactionsapi.exception.TransactionApiException;
 import com.altimetrik.transactionsapi.modal.Statistics;
 import com.altimetrik.transactionsapi.modal.Transaction;
 import org.junit.Before;
@@ -20,7 +21,6 @@ public class TransactionServiceImplTest {
 
     @TestConfiguration
     static class TransactionServiceImplTestContextConfiguration {
-
         @Bean
         public TransactionService employeeService() {
             return new TransactionServiceImpl();
@@ -48,6 +48,22 @@ public class TransactionServiceImplTest {
         transaction.setTime(LocalDateTime.now());
         ApiResponse apiResponse = transactionService.saveTransaction(transaction);
         assertEquals("Success", apiResponse.getStatus());
+    }
+
+    @Test(expected = TransactionApiException.class)
+    public void whenTransactionFuture_thenTransactionShouldNotBeInserted() {
+        Transaction transaction = new Transaction();
+        transaction.setAmount(3000);
+        transaction.setTime(LocalDateTime.now().plusMinutes(1));
+        transactionService.saveTransaction(transaction);
+    }
+
+    @Test(expected = TransactionApiException.class)
+    public void whenTransactionPast_thenTransactionShouldNotBeInserted() {
+        Transaction transaction = new Transaction();
+        transaction.setAmount(3000);
+        transaction.setTime(LocalDateTime.now().minusMinutes(1));
+        transactionService.saveTransaction(transaction);
     }
 
     @Test
