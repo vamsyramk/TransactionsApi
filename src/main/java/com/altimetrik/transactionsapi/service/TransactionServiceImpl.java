@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 @Service
@@ -21,33 +22,20 @@ public class TransactionServiceImpl implements TransactionService {
 
     private static final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
-    private List<Transaction> transactions = new ArrayList<>();
-
-    private synchronized void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-    }
-
-    private synchronized List<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    private synchronized void addTransaction(Transaction transaction) {
-        transactions.add(transaction);
-    }
-
+    private List<Transaction> transactions = new CopyOnWriteArrayList<>();
 
     @Override
     public ApiResponse saveTransaction(Transaction transaction) {
         ApiResponse apiResponse = new ApiResponse();
         Duration duration = Duration.between(transaction.getTime(), LocalDateTime.now());
-        if (duration.getSeconds() > 60) {
+        if (duration.getSeconds() > 60 || transaction.getTime().isAfter(LocalDateTime.now())) {
             log.error("The transaction time is out of one minute for: {}", transaction);
             throw new TransactionApiException(204, "The transaction has not been updated successfully", HttpStatus.NO_CONTENT);
         }
-        addTransaction(transaction);
+        transactions.add(transaction);
         apiResponse.setStatus("Success");
         apiResponse.setMessage("The transaction has been updated successfully");
-        log.info("The transaction is inserted successfully, current no of transactions: {}", getTransactions().size());
+        log.info("The transaction is inserted successfully, current no of transactions: {}", transactions.size());
         return apiResponse;
     }
 
@@ -58,7 +46,7 @@ public class TransactionServiceImpl implements TransactionService {
         long count = 0;
         double sum = 0;
         double avg = 0;
-        for (Transaction transaction : getTransactions()) {
+        for (Transaction transaction : transactions) {
             Duration duration = Duration.between(transaction.getTime(), LocalDateTime.now());
             if (duration.getSeconds() < 60) {
                 sum += transaction.getAmount();
@@ -72,16 +60,16 @@ public class TransactionServiceImpl implements TransactionService {
                 avg = sum / count;
             }
         }
-        log.info("Fetching the transactions information, current no of transactions: {}", getTransactions().size());
+        log.info("Fetching the transactions information, current no of transactions: {}", transactions.size());
         return new Statistics(min, max, avg, sum, count);
     }
 
     @Override
     public ApiResponse deleteTransactions() {
-        setTransactions(new ArrayList<>());
+        transactions.clear();
         ApiResponse apiResponse = new ApiResponse();
-        if (CollectionUtils.isEmpty(getTransactions())) {
-            log.info("The transactions were deleted successfully,current transactions: {}", getTransactions().size());
+        if (CollectionUtils.isEmpty(transactions)) {
+            log.info("The transactions were deleted successfully,current transactions: {}", transactions.size());
         }
         return apiResponse;
     }

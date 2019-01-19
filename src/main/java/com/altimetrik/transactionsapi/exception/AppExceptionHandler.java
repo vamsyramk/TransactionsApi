@@ -12,10 +12,10 @@ public class AppExceptionHandler {
     @ExceptionHandler(TransactionApiException.class)
     public ResponseEntity<ApiResponse> handleTransactionExceptions(TransactionApiException ex) {
         ApiResponse apiResponse = new ApiResponse();
-        if (ex.getHttpStatus().value() == 204) {
-            apiResponse.setStatus("Not Updated");
-            apiResponse.setMessage("The transaction is in the past time");
-        }
+//        if (ex.getHttpStatus().value() == 204) {
+//            apiResponse.setStatus("Not Updated");
+//            apiResponse.setMessage("The transaction is in the past time");
+//        }
         return new ResponseEntity<>(apiResponse, ex.getHttpStatus());
     }
 
