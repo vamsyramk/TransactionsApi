@@ -16,6 +16,8 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+        <start-class>com.altimetrik.transactionsapi.TransactionsApiApplication</start-class>
+        <maven.test.skip>false</maven.test.skip>
 	</properties>
 
 	<dependencies>

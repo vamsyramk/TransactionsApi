@@ -19,9 +19,18 @@ public class TransactionServiceImpl implements TransactionService {
 
     private List<Transaction> transactions = new ArrayList<>();
 
-    public void setTransactions(List<Transaction> transactions) {
+    private synchronized void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
     }
+
+    private synchronized List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    private synchronized void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+    }
+
 
     @Override
     public ApiResponse saveTransaction(Transaction transaction) {
@@ -30,20 +39,20 @@ public class TransactionServiceImpl implements TransactionService {
         if (duration.getSeconds() > 60) {
             throw new TransactionApiException(204, "The transaction has not been updated successfully", HttpStatus.NO_CONTENT);
         }
-        transactions.add(transaction);
+        addTransaction(transaction);
         apiResponse.setStatus("Success");
         apiResponse.setMessage("The transaction has been updated successfully");
         return apiResponse;
     }
 
     @Override
-    public Statistics getTransactions() {
+    public Statistics getTransactionsInformation() {
         double max = Double.MIN_VALUE;
         double min = Double.MAX_VALUE;
         long count = 0;
         double sum = 0;
         double avg = 0;
-        for (Transaction transaction : transactions) {
+        for (Transaction transaction : getTransactions()) {
             Duration duration = Duration.between(transaction.getTime(), LocalDateTime.now());
             if (duration.getSeconds() < 60) {
                 sum += transaction.getAmount();
@@ -62,9 +71,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public ApiResponse deleteTransactions() {
-        transactions.clear();
+        setTransactions(new ArrayList<>());
         ApiResponse apiResponse = new ApiResponse();
-        if (CollectionUtils.isEmpty(transactions)) {
+        if (CollectionUtils.isEmpty(getTransactions())) {
             apiResponse.setStatus("Success");
             apiResponse.setMessage("The transactions have been deleted successfully");
             return apiResponse;

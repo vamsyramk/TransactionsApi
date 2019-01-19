@@ -8,7 +8,7 @@ public interface TransactionService {
 
     ApiResponse saveTransaction(Transaction transaction);
 
-    Statistics getTransactions();
+    Statistics getTransactionsInformation();
 
     ApiResponse deleteTransactions();
 }

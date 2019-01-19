@@ -19,7 +19,7 @@ public class TransactionController {
 
     @GetMapping("/stats")
     public ResponseEntity<Statistics> getStatistics() {
-        return new ResponseEntity<>(transactionService.getTransactions(), HttpStatus.OK);
+        return new ResponseEntity<>(transactionService.getTransactionsInformation(), HttpStatus.OK);
     }
 
     @PostMapping("/transaction")

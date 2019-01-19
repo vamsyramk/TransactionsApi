@@ -58,4 +58,15 @@ public class Statistics {
     public void setCount(long count) {
         this.count = count;
     }
+
+    @Override
+    public String toString() {
+        return "Statistics{" +
+                "min=" + min +
+                ", max=" + max +
+                ", avg=" + avg +
+                ", sum=" + sum +
+                ", count=" + count +
+                '}';
+    }
 }
